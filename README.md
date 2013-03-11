@@ -8,7 +8,7 @@ Instalacion
 ===========
 
 1. Subir djondbd
-2. Ejecutar el script de inicializacion de la db de orfeo. djon-shell orfeo.js
+2. Ejecutar el script de inicializacion de la db de orfeo. djon-shell orfeodb.js
 3. Instalar los modulos requiridos de nodejs asi: 
    cd server    
    npm install
