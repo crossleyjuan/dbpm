@@ -7,6 +7,48 @@ function get(name){
 			      return decodeURIComponent(name[1]);
 }
 
+createField= function(parent, caption, path, control) {
+	var row = $("<div class='row' />");
+	var controlGroup = $("<div class='control-group' />");
+
+	var label = $("<label for='" + path + "' class='control-label'>" + caption + "</label>");
+	var controls = $("<div class='controls' />");
+	controls.appendTo(controlGroup);
+	label.appendTo(row);
+	control.appendTo(controls);
+	controls.appendTo(row);
+
+	row.appendTo(parent);
+};
+
+addButtons= function(parent) {
+};
+
+save=function() {
+	alert('save');
+};
+
+next=function() {
+	alert('next');
+};
+
+addButton= function(parent, element) {
+	var self = this;
+
+	var row = $("<div class='row' />");
+	var controlGroup = $("<div class='control-group' />");
+
+	var controls = $("<div class='controls' />");
+	controls.appendTo(controlGroup);
+	var button = $("<input type='button' value='" + element.caption + "' />");
+	button.bind('click', element.click);
+
+	button.appendTo(controls);
+	controls.appendTo(row);
+
+	row.appendTo(parent);
+}
+
 loadTask= function() {
 	var taskId = get("taskName");
 
@@ -23,21 +65,14 @@ loadTask= function() {
 		rows.appendTo(content);
 		$.each(fields, function(index, value) {
 			if (value.type == "text") {
-				var row = $("<div class='row' />");
-				var controlGroup = $("<div class='control-group' />");
-
-				var label = $("<label for='" + value.path + "' class='control-label'>" + value.caption + "</label>");
-				var controls = $("<div class='controls' />");
-				controls.appendTo(controlGroup);
-				var element = $("<input id='" + value.path + "' type='text'>");
-				label.appendTo(row);
-				element.appendTo(controls);
-				controls.appendTo(row);
-
-				row.appendTo(rows);
+				var element = $("<input id='" + value.path + "' class='data' type='text'>");
+				createField(rows, value.caption, value.path, element);
 			}
 		});
 		span.appendTo(title);
+
+		addButton(rows, { caption: 'Salvar', click: save});
+		addButton(rows, { caption: 'Siguiente', click: next});
 
 		$.ajax({ url: serverUrl + "processdata/" + get("processId"),
 			dataType: "json" 
