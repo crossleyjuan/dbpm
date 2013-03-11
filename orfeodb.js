@@ -1,11 +1,10 @@
 connect('localhost');
 dropNamespace('orfeodb', 'processes');
 dropNamespace('orfeodb', 'tasks');
+dropNamespace('orfeodb', 'data');
 
 var process = {
 	"_id": "edf3e1a5-0839-4c84-921c-d1b357b00d0d",
-	"_revision": "4c0f8a1c-8cd8-42c3-8c81-5610a091afd2",
-	"_status": 1,
 	"currentTask": {
 		"description": "Evaluar demanda",
 		"name": "evaluar"
@@ -21,8 +20,6 @@ insert('orfeodb', 'processes', process);
 
 var task =    {
 	"_id": "evaluar",
-	"_revision": "9f0245f3-72e3-4e51-81d3-3510c5853f4a",
-	"_status": 1,
 	"form": {
 		"caption": "Evaluar demanda",
 		"fields": [
@@ -45,4 +42,70 @@ var task =    {
 };
 
 insert('orfeodb', 'tasks', task);
+
+var data =     {
+	"_id": "edf3e1a5-0839-4c84-921c-d1b357b00d0d",
+	"apellido": "Sanchez",
+	"nombre": "Pepe"
+}
+insert('orfeodb', 'data', data);
+
+//----------------------------
+// Otro procesos
+//
+
+var processId = uuid();
+var process = {
+	"_id": processId,
+	"currentTask": {
+		"description": "Validar derecho de peticion",
+		"name": "validar"
+	},
+	"currentUser": {
+		"fullName": "Juan Pablo Crossley",
+		"username": "cross"
+	},
+	"expireDate": "1913-03-25T05:00:00.000Z"
+};
+
+insert('orfeodb', 'processes', process);
+
+var task =    {
+	"_id": "validar",
+	"form": {
+		"caption": "Validar derecho de peticion",
+		"fields": [
+		{
+			"caption": "Fecha de radicacion",
+			"path": "fecha",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Ciudadano",
+			"path": "nombre",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Descripcion de documento",
+			"path": "descripcionDocumento",
+			"required": 0,
+			"type": "text"
+		}
+		]
+	},
+	"name": "evaluar",
+	"process": processId 
+};
+
+insert('orfeodb', 'tasks', task);
+
+var data =     {
+	"_id": processId,
+	"fecha": new Date().toString(),
+	"nombre": "Andres Perez",
+	"descripcionDocumento": "Derecho de peticion de prueba"
+}
+insert('orfeodb', 'data', data);
 
