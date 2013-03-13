@@ -1,5 +1,3 @@
-var serverUrl = "http://localhost:50123/processes";
-
 var ProcessesModel = function(data) {
 	var self = this;
 
@@ -17,7 +15,7 @@ var ProcessesModel = function(data) {
 };
 
 $.ajax({
-		url: serverUrl + "/cross"
+		url: nodejs + "processes/cross"
 }).done(function (allData) {
 	var elements = eval(allData);
 	ko.applyBindings(new ProcessesModel(elements));

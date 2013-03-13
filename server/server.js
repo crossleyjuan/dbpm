@@ -54,13 +54,20 @@ app.get("/processdata/:id", function(req, res, next) {
 
 
 getTask=function(taskName) {
-	var conn = db.getConnection("localhost");
-	conn.open();
 
 	var task = cache.get("task_" + taskName);
 	if (task == undefined) {
+		var conn = db.getConnection("localhost");
+		conn.open();
+
 		task = conn.findByKey("orfeodb", "tasks", taskName);
 		cache.put("task_" + taskName, task);
+	}
+
+	if (task != undefined) {
+		console.log("getTask(" + taskName + "): " + task.name);
+	} else {
+		console.log("getTask(" + taskName + "): null");
 	}
 	return task;
 };
@@ -74,11 +81,16 @@ getProcess=function(processName) {
 		process = conn.findByKey("orfeodb", "processDefinition", processName);
 		cache.put("process_" + processName, process);
 	}
+	if (process != undefined) {
+		console.log("getProcess(" + processName + "): " + process.name);
+	} else {
+		console.log("getProcess(" + processName + "): null");
+	}
 	return process;
 };
 
 app.post("/process/next/:id/:currentTask", function(req, res, next) {
-	console.log("POST: /process/next");
+	console.log("POST: /process/next/" + req.params.id + "/" + req.params.currentTask);
 
 	var conn = db.getConnection("localhost");
 	conn.open();
@@ -94,6 +106,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	var tasks = processDef.task;
 	var found = false;
 	var nextTask;
+	console.log("currentTask: " + JSON.stringify(currentTask));
 	for (var x = 0; x < tasks.length; x++) {
 		var task = tasks[x];
 		console.log("task: " + task.name);
@@ -108,11 +121,17 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	};
 
 	var processData = conn.findByKey('orfeodb', 'processes', data["h_id"]);
-	
-	processData.currentTask = {
-		description: nextTask.description,
-		name: nextTask.name
-	};
+
+	if (nextTask != undefined) {
+		processData.currentTask = {
+			description: nextTask.description,
+			name: nextTask.name
+		};
+		processData.status = 'open';
+	} else {
+		processData.currentTask = {};
+		processData.status = 'closed';
+	}
 	conn.update("orfeodb", "processes", processData);
 
 	var resultData = {};
@@ -131,6 +150,36 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(processData);
+	res.header("Content-Length", response.length);
+	res.end(response);
+	console.log(response);
+});
+
+app.post("/process/save/:id/:currentTask", function(req, res, next) {
+	console.log("POST: /process/save");
+
+	var conn = db.getConnection("localhost");
+	conn.open();
+
+	var data = req.body;
+
+	var resultData = {};
+	for (var i in data) {
+		if (i == "h_id") {
+			resultData["_id"] = data[i];
+		} else if (i == "h_revision") {
+			resultData["_revision"] = data[i];
+		} else {
+			resultData[i] = data[i];
+		}
+	}
+
+	conn.update("orfeodb", "data", resultData);
+
+	db.releaseConnection(conn);
+
+	var response = JSON.stringify({ result: "success"});
+
 	res.header("Content-Length", response.length);
 	res.end(response);
 	console.log(response);

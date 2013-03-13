@@ -121,7 +121,7 @@ var task =    {
 		}
 		]
 	},
-	"name": "evaluar",
+	"name": "validar",
 	"description": "Evaluar derecho de peticion",
 	"processName": "DerPeticion"
 };
@@ -131,6 +131,7 @@ var task =    {
 	"_id": "aprobarPeticion",
 	"name": "aprobarPeticion",
 	"description": "Aprobar derecho de peticion",
+	"processName": "DerPeticion",
 	"form": {
 		"caption": "Aprobar derecho de peticion",
 		"fields": [

@@ -1,4 +1,3 @@
-var serverUrl = "http://localhost:50123/";
 // This will apply date picker plugin
 $(".datepicker").datepicker();
 
@@ -25,7 +24,24 @@ addButtons= function(parent) {
 };
 
 save=function() {
-	alert('save');
+	var controls = $(".data");
+	
+	var data = {};
+	$.each(controls, function(index, value) {
+		var control = $(value);
+		data[value.name] = control.val();
+	});
+	var processId = $("#h_id").val();
+	var taskId = get("taskName");
+	var urlPost = nodejs + "process/save/" + processId + "/" + taskId; 
+	$.ajax({
+		url: urlPost,
+		dataType: "json",
+		type: "POST",
+		data: data
+	}).done(function(data) {
+		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
+	});
 };
 
 getControlValue=function(controlName) {
@@ -43,7 +59,7 @@ next=function() {
 	});
 	var processId = $("#h_id").val();
 	var taskId = get("taskName");
-	var urlPost = serverUrl + "process/next/" + processId + "/" + taskId; 
+	var urlPost = nodejs + "process/next/" + processId + "/" + taskId; 
 	$.ajax({
 		url: urlPost,
 		dataType: "json",
@@ -51,8 +67,12 @@ next=function() {
 		data: data
 	}).done(function(data) {
 		var processId = data["_id"];
-		var task = data.currentTask.name;
-		window.location.href = 'http://localhost/orfeo/load.htm?processId=' + processId + '&taskName=' + task;
+		if (data.status == 'open') {
+			var task = data.currentTask.name;
+			window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + task;
+		} else {
+			window.location.href = serverUrl + 'index.htm';
+		}
 	});
 };
 
@@ -76,7 +96,7 @@ addButton= function(parent, element) {
 loadTask= function() {
 	var taskId = get("taskName");
 
-	$.ajax({ url: serverUrl + "task/" + taskId,
+	$.ajax({ url: nodejs + "task/" + taskId,
 		dataType: "json"
 	}).done(function(data) {
 		var self = this;
@@ -104,7 +124,7 @@ loadTask= function() {
 		addButton(rows, { caption: 'Salvar', click: save});
 		addButton(rows, { caption: 'Siguiente', click: next});
 
-		$.ajax({ url: serverUrl + "processdata/" + processId,
+		$.ajax({ url: nodejs + "processdata/" + processId,
 			dataType: "json" 
 		}).done(function(processData) {
 			$("<input type='hidden' id='h_id' name='h_id' value='" + processData["_id"] + "' class='data' />").appendTo(form);
