@@ -1,4 +1,4 @@
-var serverUrl = "http://172.16.15.105:50123/";
+var serverUrl = "http://localhost:50123/";
 // This will apply date picker plugin
 $(".datepicker").datepicker();
 
@@ -36,8 +36,24 @@ getControlValue=function(controlName) {
 next=function() {
 	var controls = $(".data");
 	
-   var form = $("#mainForm");
-	form.submit();
+	var data = {};
+	$.each(controls, function(index, value) {
+		var control = $(value);
+		data[value.name] = control.val();
+	});
+	var processId = $("#h_id").val();
+	var taskId = get("taskName");
+	var urlPost = serverUrl + "process/next/" + processId + "/" + taskId; 
+	$.ajax({
+		url: urlPost,
+		dataType: "json",
+		type: "POST",
+		data: data
+	}).done(function(data) {
+		var processId = data["_id"];
+		var task = data.currentTask.name;
+		window.location.href = 'http://localhost/orfeo/load.htm?processId=' + processId + '&taskName=' + task;
+	});
 };
 
 addButton= function(parent, element) {
@@ -71,7 +87,7 @@ loadTask= function() {
 		var fields = self.formDef.fields;
 		var processId = get("processId");
 
-		var form = $("<form id='mainForm' method='post' action='" + serverUrl + "process/next/" + processId + "/" + taskId + "' />");
+		var form = $("<form id='mainForm' />");
 
 		form.appendTo(content);
 
@@ -91,8 +107,8 @@ loadTask= function() {
 		$.ajax({ url: serverUrl + "processdata/" + processId,
 			dataType: "json" 
 		}).done(function(processData) {
-			$("<input type='hidden' id='h_id' name='h_id' value='" + processData["_id"] + "' />").appendTo(form);
-			$("<input type='hidden' id='h_revision' name='h_revision' value='" + processData["_revision"] + "' />").appendTo(form);
+			$("<input type='hidden' id='h_id' name='h_id' value='" + processData["_id"] + "' class='data' />").appendTo(form);
+			$("<input type='hidden' id='h_revision' name='h_revision' value='" + processData["_revision"] + "' class='data' />").appendTo(form);
 
 			$.each(fields, function(index, field) {
 				var element = $("#" + field.path);

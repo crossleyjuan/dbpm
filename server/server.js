@@ -115,7 +115,6 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	};
 	conn.update("orfeodb", "processes", processData);
 
-
 	var resultData = {};
 	for (var i in data) {
 		if (i == "h_id") {
@@ -131,7 +130,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 
 	db.releaseConnection(conn);
 
-	var response = JSON.stringify(data);
+	var response = JSON.stringify(processData);
 	res.header("Content-Length", response.length);
 	res.end(response);
 	console.log(response);
