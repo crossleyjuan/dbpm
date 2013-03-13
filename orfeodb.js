@@ -1,14 +1,19 @@
 connect('localhost');
+dropNamespace('orfeodb', 'processDefinition');
 dropNamespace('orfeodb', 'processes');
 dropNamespace('orfeodb', 'tasks');
 dropNamespace('orfeodb', 'data');
-
 
 //
 // Metadata
 //
 //
+
+//************************************************
+// Demandas 
+//************************************************
 var processDef = {
+	"_id": "Demandas",
 	"name": "Demandas",
 	"Descripcion": "Radicacion de demadas",
 	"task": 
@@ -39,11 +44,48 @@ var task =    {
 		]
 	},
 	"name": "evaluar",
+	"description": "Evaluar demanda",
 	"processName": "Demandas"
 };
 insert('orfeodb', 'tasks', task);
 
+var task =    {
+	"_id": "aprobar",
+	"form": {
+		"caption": "Aprobar demanda",
+		"fields": [
+		{
+			"caption": "Nombre",
+			"path": "nombre",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Apellido",
+			"path": "apellido",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Aprobar",
+			"path": "aprobar",
+			"required": 0,
+			"type": "boolean"
+		}
+		]
+	},
+	"name": "aprobar",
+	"description": "Aprobar demanda",
+	"processName": "Demandas"
+};
+insert('orfeodb', 'tasks', task);
+
+
+//************************************************
+// Derechos de peticion
+//************************************************
 var processDef = {
+	"_id": "DerPeticion",
 	"name": "DerPeticion",
 	"Descripcion": "Derechos de peticion",
 	"task": 
@@ -79,13 +121,16 @@ var task =    {
 		}
 		]
 	},
-	"name": "evaluar"
+	"name": "evaluar",
+	"description": "Evaluar derecho de peticion",
+	"processName": "DerPeticion"
 };
 insert('orfeodb', 'tasks', task);
 
 var task =    {
 	"_id": "aprobarPeticion",
 	"name": "aprobarPeticion",
+	"description": "Aprobar derecho de peticion",
 	"form": {
 		"caption": "Aprobar derecho de peticion",
 		"fields": [

@@ -1,4 +1,4 @@
-var serverUrl = "http://localhost:50123/processes";
+var serverUrl = "http://172.16.15.105:50123/processes";
 
 var ProcessesModel = function(data) {
 	var self = this;

@@ -1,4 +1,4 @@
-var serverUrl = "http://localhost:50123/";
+var serverUrl = "http://172.16.15.105:50123/";
 // This will apply date picker plugin
 $(".datepicker").datepicker();
 
@@ -28,8 +28,16 @@ save=function() {
 	alert('save');
 };
 
+getControlValue=function(controlName) {
+	var control = $("#" + controlName);
+	return control.val();
+};
+
 next=function() {
-	alert('next');
+	var controls = $(".data");
+	
+   var form = $("#mainForm");
+	form.submit();
 };
 
 addButton= function(parent, element) {
@@ -56,16 +64,22 @@ loadTask= function() {
 		dataType: "json"
 	}).done(function(data) {
 		var self = this;
-		self.form = data.form;
+		self.formDef = data.form;
 		var content = $("#form");
 		var title = $("#title");
-		var span = $("<span>" + self.form.caption + "</span>");
-		var fields = self.form.fields;
+		var span = $("<span>" + self.formDef.caption + "</span>");
+		var fields = self.formDef.fields;
+		var processId = get("processId");
+
+		var form = $("<form id='mainForm' method='post' action='" + serverUrl + "process/next/" + processId + "/" + taskId + "' />");
+
+		form.appendTo(content);
+
 		var rows = $("<div class='row-fluid' />");
-		rows.appendTo(content);
+		rows.appendTo(form);
 		$.each(fields, function(index, value) {
 			if (value.type == "text") {
-				var element = $("<input id='" + value.path + "' class='data' type='text'>");
+				var element = $("<input id='" + value.path + "' name='" + value.path + "' class='data' type='text'>");
 				createField(rows, value.caption, value.path, element);
 			}
 		});
@@ -74,9 +88,12 @@ loadTask= function() {
 		addButton(rows, { caption: 'Salvar', click: save});
 		addButton(rows, { caption: 'Siguiente', click: next});
 
-		$.ajax({ url: serverUrl + "processdata/" + get("processId"),
+		$.ajax({ url: serverUrl + "processdata/" + processId,
 			dataType: "json" 
 		}).done(function(processData) {
+			$("<input type='hidden' id='h_id' name='h_id' value='" + processData["_id"] + "' />").appendTo(form);
+			$("<input type='hidden' id='h_revision' name='h_revision' value='" + processData["_revision"] + "' />").appendTo(form);
+
 			$.each(fields, function(index, field) {
 				var element = $("#" + field.path);
 				element.val(processData[field.path]);
