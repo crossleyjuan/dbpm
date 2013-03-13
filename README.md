@@ -16,4 +16,7 @@ Instalacion
    node server.js
 4. Abrir en el browser el cliente client/index.htm
 
+Nota importante
+===============
 
+para que el cliente funcione es necesario validar el client/js/defs.js para actualizar la direccion del server donde se está probando.
