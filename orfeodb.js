@@ -15,7 +15,7 @@ dropNamespace('orfeodb', 'data');
 var processDef = {
 	"_id": "Demandas",
 	"name": "Demandas",
-	"Descripcion": "Radicacion de demadas",
+	"description": "Radicacion de demadas",
 	"task": 
 	[
 		{ "name": "evaluar"  },
@@ -87,7 +87,7 @@ insert('orfeodb', 'tasks', task);
 var processDef = {
 	"_id": "DerPeticion",
 	"name": "DerPeticion",
-	"Descripcion": "Derechos de peticion",
+	"description": "Derechos de peticion",
 	"task": 
 	[
 		{ "name": "validar"  },

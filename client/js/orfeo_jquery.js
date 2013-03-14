@@ -23,6 +23,34 @@ createField= function(parent, caption, path, control) {
 addButtons= function(parent) {
 };
 
+loadNewCase=function() {
+	var urlPost = nodejs + "processDefinition"; 
+	$.ajax({
+		url:  urlPost,
+		dataType: "json"
+	}).done(function(data) {
+		var div = $("#newcase");
+		var urlCreate = nodejs + "process/createCase/";
+		var ul = $("<ul style='list-style-type: none;' />");
+		ul.appendTo(div);
+		$.each(data, function(index, procDef) {
+			var url = urlCreate + procDef.name;
+			var anchor = $("<a href='javascript:void(0);'>Crear proceso de: '" + procDef.description + "'</a>");
+			anchor.bind("click", function() {
+				$.ajax({
+					url: url,
+					dataType: "json"
+				}).done(function(data) {
+					window.location.href = serverUrl + 'load.htm?processId=' + data["_id"] + '&taskName=' + data.currentTask.name;
+				});
+			});
+			var li = $("<li>");
+			anchor.appendTo(li);
+			li.appendTo(ul);
+		});
+	});
+}
+
 save=function() {
 	var controls = $(".data");
 	

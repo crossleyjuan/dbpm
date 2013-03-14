@@ -23,7 +23,7 @@ var allowCrossDomain = function(req, res, next) {
 
 app.configure(function () {
   app.use(allowCrossDomain);
-  app.use(express.bodyParser());
+  app.use(express.bodyParser({uploadDir: './uploads'}));
   app.use(express.methodOverride());
   app.use(app.router);
 });
@@ -155,6 +155,46 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	console.log(response);
 });
 
+app.get("/process/createCase/:process", function(req, res, next) {
+	console.log("POST: /process/createCase/" + req.params.process);
+
+	var conn = db.getConnection("localhost");
+	conn.open();
+
+	var data = req.body;
+
+	var processName = req.params.process;
+
+	var processDef = getProcess(processName);
+	var processId = uuid.v1();
+	var firstTask = getTask(processDef.task[0].name);
+	var process = {
+		_id: processId,
+		process: processName,
+		currentTask: {
+			description: firstTask.description,
+			name: firstTask.name 
+		},
+		currentUser: {
+			fullName: "Juan Pablo Crossley",
+			username: "cross"
+		},
+		status: "open",
+		expireDate: "1913-03-25T05:00:00.000Z"
+	};
+	conn.insert('orfeodb', 'processes', process);
+
+	var data = {_id: processId};
+	conn.insert('orfeodb', 'data', data);
+
+	db.releaseConnection(conn);
+
+	var response = JSON.stringify(process);
+	res.header("Content-Length", response.length);
+	res.end(response);
+	console.log(response);
+});
+
 app.post("/process/save/:id/:currentTask", function(req, res, next) {
 	console.log("POST: /process/save");
 
@@ -192,6 +232,21 @@ app.get("/processes/:user", function(req, res, next) {
 	conn.open();
 
 	var results = conn.find("orfeodb", "processes", "$'currentUser.username' == '" + req.params.user + "'");
+	db.releaseConnection(conn);
+
+	var response = JSON.stringify(results);
+	console.log("result: " + response);
+	res.header("Content-Length", response.length);
+	res.end(response);
+});
+
+app.get("/processDefinition", function(req, res, next) {
+	console.log("GET: /processDefinition");
+
+	var conn = db.getConnection("localhost");
+	conn.open();
+
+	var results = conn.find("orfeodb", "processDefinition");
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(results);
