@@ -214,7 +214,11 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 		}
 	}
 
-	conn.update("orfeodb", "data", resultData);
+	try {
+		conn.update("orfeodb", "data", resultData);
+	} catch (e) {
+		console.error(e);
+	}
 
 	db.releaseConnection(conn);
 

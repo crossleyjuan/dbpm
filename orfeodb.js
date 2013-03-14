@@ -174,6 +174,7 @@ insert('orfeodb', 'tasks', task);
 //****************************************************
 // Data
 //
+/*
 var process = {
 	"_id": "edf3e1a5-0839-4c84-921c-d1b357b00d0d",
 	"process": "Demadas",
@@ -220,4 +221,4 @@ var data =     {
 	"descripcionDocumento": "Derecho de peticion de prueba"
 }
 insert('orfeodb', 'data', data);
-
+*/
