@@ -121,6 +121,22 @@ addButton= function(parent, element) {
 	row.appendTo(parent);
 }
 
+popupWindow=function(url, done) {
+	var windowName = "popup";
+	var windowSize = 'height=820,width=704,toolbar=no,scrollbars=yes';
+
+	var $popup = $(window.open(url, windowName, windowSize));
+
+	$popup.load( function () {     //  Execute this function on load
+		$popup.unload(function(){  // Bind the actual event
+			if (done != undefined) {
+				done();
+			}
+		});
+	});
+}
+
+
 loadTask= function() {
 	var taskId = get("taskName");
 
@@ -130,6 +146,10 @@ loadTask= function() {
 		var self = this;
 		self.formDef = data.form;
 		var content = $("#form");
+		// Cleanup everything
+		$.each(content.children(), function(index, val) {
+			val.remove();
+		});
 		var title = $("#title");
 		var span = $("<span>" + self.formDef.caption + "</span>");
 		var fields = self.formDef.fields;
@@ -147,6 +167,15 @@ loadTask= function() {
 				createField(rows, value.caption, value.path, element);
 			}
 		});
+
+		var uploadButton = $("<input id='uploads' name='uploads' class='data' type='button' value='Subir'>");
+		createField(rows, 'upload',  'upload', uploadButton);
+		uploadButton.bind("click", function() {
+			popupWindow(serverUrl + 'loadfile.htm?processId=' + processId + '&taskName=' + taskId, function() {
+				loadTask();
+			});
+		});
+
 		span.appendTo(title);
 
 		addButton(rows, { caption: 'Salvar', click: save});
@@ -163,6 +192,31 @@ loadTask= function() {
 				element.val(processData[field.path]);
 			});
 
+			if (processData.files != undefined) {
+				var ulFiles = $("<ul />");
+				createField(rows, 'archivos', 'archivos', ulFiles);
+				$.each(processData.files, function(i, val) {
+					var li = $("<li>");
+					var url = nodejs + "process/file/" + processData["_id"] + "/" + val.name;
+					var anchor = $("<a href='" + url + "'>" + val.name + "</a>");
+					anchor.appendTo(li);
+					li.appendTo(ulFiles);
+				});
+			}
 		});
+	});
+}
+
+loadFileForm=function() {
+	var form=$("#file");
+	var processId=get("processId");
+	var taskName=get("taskName");
+
+	var urlPost = nodejs + "process/upload/" + processId + "/" + taskName; 
+	form.attr("action", urlPost); 
+
+	form.submit(function(e) {
+		window.close();
+		return true;
 	});
 }

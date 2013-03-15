@@ -31,9 +31,14 @@
 		<div class="container">
 			<h2 id="title" class="content-heading"></h2>
 
-			<a href="index.htm">Inicio</a>
 			<div id="form" class="content">
 
+				<form id='file' method='POST' enctype='multipart/form-data' >
+					<input type='hidden' id='h_id' name='h_id' />
+					<input type='hidden' id='h_task' name='h_task' />
+					Archivo: 	<input type='file' id='file' name='file' />
+					<input type='submit' />
+				</form>
 			</div> <!-- /container -->
 
 			<!-- Le javascript
@@ -49,7 +54,7 @@
 			<script src="js/date.js"></script>
 
 			<script language="javascript">
-				loadTask();
+				loadFileForm();
 			</script>
 		</body>
 	</html>
