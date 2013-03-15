@@ -52,12 +52,14 @@ loadNewCase=function() {
 }
 
 save=function(done) {
-	sendSave(function() {	
+	var processId = $("#h_id").val();
+	var taskId = get("taskName");
+	$.when(sendSave().done(function() {	
 		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
-	});
+	}));
 }
 
-sendSave=function(done) {
+sendSave=function() {
 	var controls = $(".data");
 	
 	var data = {};
@@ -68,16 +70,16 @@ sendSave=function(done) {
 	var processId = $("#h_id").val();
 	var taskId = get("taskName");
 	var urlPost = nodejs + "process/save/" + processId + "/" + taskId; 
+	var defer = new $.Deferred();
 	$.ajax({
 		url: urlPost,
 		dataType: "json",
 		type: "POST",
 		data: data
 	}).done(function(data) {
-		if (done != undefined) {
-		  	done();
-		}
+		defer.resolve(data);
 	});
+	return defer.promise();
 };
 
 getControlValue=function(controlName) {
@@ -179,9 +181,10 @@ loadTask= function() {
 		var uploadButton = $("<input id='uploads' name='uploads' class='data' type='button' value='Subir'>");
 		createField(rows, 'upload',  'upload', uploadButton);
 		uploadButton.bind("click", function() {
-			sendSave();
-			popupWindow(serverUrl + 'loadfile.htm?processId=' + processId + '&taskName=' + taskId, function() {
-				loadTask();
+			$.when(sendSave()).done(function() {
+				popupWindow(serverUrl + 'loadfile.htm?processId=' + processId + '&taskName=' + taskId, function() {
+					loadTask();
+				})
 			});
 		});
 
