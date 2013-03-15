@@ -51,7 +51,13 @@ loadNewCase=function() {
 	});
 }
 
-save=function() {
+save=function(done) {
+	sendSave(function() {	
+		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
+	});
+}
+
+sendSave=function(done) {
 	var controls = $(".data");
 	
 	var data = {};
@@ -68,7 +74,9 @@ save=function() {
 		type: "POST",
 		data: data
 	}).done(function(data) {
-		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
+		if (done != undefined) {
+		  	done();
+		}
 	});
 };
 
@@ -171,6 +179,7 @@ loadTask= function() {
 		var uploadButton = $("<input id='uploads' name='uploads' class='data' type='button' value='Subir'>");
 		createField(rows, 'upload',  'upload', uploadButton);
 		uploadButton.bind("click", function() {
+			sendSave();
 			popupWindow(serverUrl + 'loadfile.htm?processId=' + processId + '&taskName=' + taskId, function() {
 				loadTask();
 			});
