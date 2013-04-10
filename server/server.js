@@ -132,6 +132,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 		processData.currentTask = {};
 		processData.status = 'closed';
 	}
+	console.log("doing update: " + JSON.stringify(processData));
 	conn.update("orfeodb", "processes", processData);
 
 	var resultData = {};
@@ -145,6 +146,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 		}
 	}
 
+	console.log("doing update: " + JSON.stringify(resultData));
 	conn.update("orfeodb", "data", resultData);
 
 	db.releaseConnection(conn);
@@ -235,7 +237,7 @@ app.get("/processes/:user", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var results = conn.find("orfeodb", "processes", "$'currentUser.username' == '" + req.params.user + "'");
+	var results = conn.find("orfeodb", "processes", "$'currentUser.username' == '" + req.params.user + "' and $'status' != 'closed'");
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(results);

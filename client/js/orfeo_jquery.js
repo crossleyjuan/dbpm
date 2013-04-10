@@ -12,15 +12,17 @@ createField= function(parent, caption, path, control) {
 
 	var label = $("<label for='" + path + "' class='control-label'>" + caption + "</label>");
 	var controls = $("<div class='controls' />");
-	controls.appendTo(controlGroup);
-	label.appendTo(row);
+
+	var span = $("<span class='span4' />");
 	control.appendTo(controls);
+	controls.appendTo(controlGroup);
+	label.appendTo(span);
+
+	span.appendTo(row);
+
 	controls.appendTo(row);
 
 	row.appendTo(parent);
-};
-
-addButtons= function(parent) {
 };
 
 loadNewCase=function() {
@@ -30,12 +32,14 @@ loadNewCase=function() {
 		dataType: "json"
 	}).done(function(data) {
 		var div = $("#newcase");
+
+		var span = $("<span class='process title'>Crear</span>").appendTo(div);
 		var urlCreate = nodejs + "process/createCase/";
-		var ul = $("<ul style='list-style-type: none;' />");
+		var ul = $("<div class='title' />");
 		ul.appendTo(div);
 		$.each(data, function(index, procDef) {
 			var url = urlCreate + procDef.name;
-			var anchor = $("<a href='javascript:void(0);'>Crear proceso de: '" + procDef.description + "'</a>");
+			var anchor = $("<a href='javascript:void(0);' class='cases btn btn-primary'>" + procDef.description + "</a>");
 			anchor.bind("click", function() {
 				$.ajax({
 					url: url,
@@ -44,9 +48,7 @@ loadNewCase=function() {
 					window.location.href = serverUrl + 'load.htm?processId=' + data["_id"] + '&taskName=' + data.currentTask.name;
 				});
 			});
-			var li = $("<li>");
-			anchor.appendTo(li);
-			li.appendTo(ul);
+			anchor.appendTo(ul);
 		});
 	});
 }
@@ -57,7 +59,7 @@ save=function() {
 	var data = {};
 	$.each(controls, function(index, value) {
 		var control = $(value);
-		data[value.name] = control.val();
+		data[value.id] = control.val();
 	});
 	var processId = $("#h_id").val();
 	var taskId = get("taskName");
@@ -107,18 +109,10 @@ next=function() {
 addButton= function(parent, element) {
 	var self = this;
 
-	var row = $("<div class='row' />");
-	var controlGroup = $("<div class='control-group' />");
-
-	var controls = $("<div class='controls' />");
-	controls.appendTo(controlGroup);
-	var button = $("<input type='button' value='" + element.caption + "' />");
+	var button = $("<a class='btn btn-primary'>" + element.caption + "<a/>");
 	button.bind('click', element.click);
 
-	button.appendTo(controls);
-	controls.appendTo(row);
-
-	row.appendTo(parent);
+	button.appendTo(parent);
 }
 
 loadTask= function() {
@@ -135,22 +129,30 @@ loadTask= function() {
 		var fields = self.formDef.fields;
 		var processId = get("processId");
 
-		var form = $("<form id='mainForm' />");
+		var form = $("<form id='mainForm' class='form-horizontal' />");
 
 		form.appendTo(content);
 
 		var rows = $("<div class='row-fluid' />");
 		rows.appendTo(form);
 		$.each(fields, function(index, value) {
+			$(value).render({ container: rows });
+			/*
 			if (value.type == "text") {
-				var element = $("<input id='" + value.path + "' name='" + value.path + "' class='data' type='text'>");
+				var element = $("<input id='" + value.path + "' class='data input-large' name='" + value.path + "' type='text'>");
 				createField(rows, value.caption, value.path, element);
 			}
+			if (value.type == "boolean") {
+				var element = $("<input id='" + value.path + "' class='data input-large' name='" + value.path + "' type='checkbox'>");
+				createField(rows, value.caption, value.path, element);
+			}
+			*/
 		});
 		span.appendTo(title);
 
-		addButton(rows, { caption: 'Salvar', click: save});
-		addButton(rows, { caption: 'Siguiente', click: next});
+		var actions = $("<div class='form-actions'>").appendTo(form);
+		addButton(actions, { caption: 'Salvar', click: save});
+		addButton(actions, { caption: 'Siguiente', click: next});
 
 		$.ajax({ url: nodejs + "processdata/" + processId,
 			dataType: "json" 
@@ -160,7 +162,7 @@ loadTask= function() {
 
 			$.each(fields, function(index, field) {
 				var element = $("#" + field.path);
-				element.val(processData[field.path]);
+				element.setValue(processData[field.path]);
 			});
 
 		});

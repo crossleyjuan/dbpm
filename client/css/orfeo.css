@@ -33,3 +33,14 @@ body {
 	margin-bottom: 10px;
 	padding: 5px 5px 5px 5px;
 }
+
+.title {
+	font-size: 18px;
+	height: auto;
+}
+
+.cases {
+  list-style-type: none;
+  margin: 10px;
+}
+

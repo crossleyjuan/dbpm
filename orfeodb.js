@@ -40,6 +40,12 @@ var task =    {
 			"path": "apellido",
 			"required": 0,
 			"type": "text"
+		},
+		{
+			"caption": "Observaciones",
+			"path": "observaciones",
+			"required": 0,
+			"type": "text"
 		}
 		]
 	},
@@ -63,6 +69,12 @@ var task =    {
 		{
 			"caption": "Apellido",
 			"path": "apellido",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Observaciones",
+			"path": "observaciones",
 			"required": 0,
 			"type": "text"
 		},
