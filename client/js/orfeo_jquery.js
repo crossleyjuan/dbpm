@@ -53,15 +53,24 @@ loadNewCase=function() {
 	});
 }
 
+collectData=function() {
+	var controls = $(".data");
+	var data = {};
+	$.each(controls, function(index, element) {
+		var control = getRender(element.id);
+		if (control != undefined) {
+			data[element.id] = control.value();
+		}
+	});
+	return data;
+};
+
 save=function() {
 	var controls = $(".data");
 	
-	var data = {};
-	$.each(controls, function(index, value) {
-		var control = $(value);
-		data[value.id] = control.val();
-	});
-	var processId = $("#h_id").val();
+	var data = collectData();
+
+	var processId = data["_id"];
 	var taskId = get("taskName");
 	var urlPost = nodejs + "process/save/" + processId + "/" + taskId; 
 	$.ajax({
@@ -81,13 +90,10 @@ getControlValue=function(controlName) {
 
 next=function() {
 	var controls = $(".data");
-	
-	var data = {};
-	$.each(controls, function(index, value) {
-		var control = $(value);
-		data[value.name] = control.val();
-	});
-	var processId = $("#h_id").val();
+
+	var data = collectData();
+
+	var processId = data["_id"];
 	var taskId = get("taskName");
 	var urlPost = nodejs + "process/next/" + processId + "/" + taskId; 
 	$.ajax({
@@ -136,17 +142,8 @@ loadTask= function() {
 		var rows = $("<div class='row-fluid' />");
 		rows.appendTo(form);
 		$.each(fields, function(index, value) {
-			$(value).render({ container: rows });
-			/*
-			if (value.type == "text") {
-				var element = $("<input id='" + value.path + "' class='data input-large' name='" + value.path + "' type='text'>");
-				createField(rows, value.caption, value.path, element);
-			}
-			if (value.type == "boolean") {
-				var element = $("<input id='" + value.path + "' class='data input-large' name='" + value.path + "' type='checkbox'>");
-				createField(rows, value.caption, value.path, element);
-			}
-			*/
+			var element = createControl(value);
+			element.baseRender(rows);
 		});
 		span.appendTo(title);
 
@@ -157,12 +154,14 @@ loadTask= function() {
 		$.ajax({ url: nodejs + "processdata/" + processId,
 			dataType: "json" 
 		}).done(function(processData) {
-			$("<input type='hidden' id='h_id' name='h_id' value='" + processData["_id"] + "' class='data' />").appendTo(form);
-			$("<input type='hidden' id='h_revision' name='h_revision' value='" + processData["_revision"] + "' class='data' />").appendTo(form);
+			createControl({type: 'hidden', path:'_id', data: processData["_id"]}).baseRender(rows);
+			createControl({type: 'hidden', path:'_revision', data: processData["_revision"]}).baseRender(rows);
 
 			$.each(fields, function(index, field) {
-				var element = $("#" + field.path);
-				element.setValue(processData[field.path]);
+				var element = getRender(field.path);
+				if (element != undefined) {
+					element.setValue(processData[field.path]);
+				}
 			});
 
 		});

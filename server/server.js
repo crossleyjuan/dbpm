@@ -120,7 +120,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 		}
 	};
 
-	var processData = conn.findByKey('orfeodb', 'processes', data["h_id"]);
+	var processData = conn.findByKey('orfeodb', 'processes', data["_id"]);
 
 	if (nextTask != undefined) {
 		processData.currentTask = {
@@ -137,9 +137,9 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 
 	var resultData = {};
 	for (var i in data) {
-		if (i == "h_id") {
+		if (i == "_id") {
 			resultData["_id"] = data[i];
-		} else if (i == "h_revision") {
+		} else if (i == "_revision") {
 			resultData["_revision"] = data[i];
 		} else {
 			resultData[i] = data[i];
@@ -191,6 +191,7 @@ app.get("/process/createCase/:process", function(req, res, next) {
 
 	db.releaseConnection(conn);
 
+	console.log("Case created. process: " + JSON.stringify(process) + ", data: " + JSON.stringify(data));
 	var response = JSON.stringify(process);
 	res.header("Content-Length", response.length);
 	res.end(response);
@@ -207,9 +208,9 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 
 	var resultData = {};
 	for (var i in data) {
-		if (i == "h_id") {
+		if (i == "_id") {
 			resultData["_id"] = data[i];
-		} else if (i == "h_revision") {
+		} else if (i == "_revision") {
 			resultData["_revision"] = data[i];
 		} else {
 			resultData[i] = data[i];
@@ -218,6 +219,8 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 
 	try {
 		conn.update("orfeodb", "data", resultData);
+
+		console.log("save: " + JSON.stringify(resultData));
 	} catch (e) {
 		console.error(e);
 	}

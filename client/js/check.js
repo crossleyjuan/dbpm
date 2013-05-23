@@ -1,53 +1,29 @@
-(function($){
-	     $.fn.extend({ 
-			           
-			  check: function(options) {
-				  var self = this;
+var check = function(options) {
+	var self = this;
+	self.options = options;
+	// Show value and label?
+	self.options.label = true;
+	self.options.value = true;
+};
 
-				  //	  Set the default values, use comma to separate the settings, example:
-				  var defaults = {
-				  }
+extendObj(check, base);
 
-				  var options =  $.extend(defaults, options);
+check.prototype.render = function() {
+	var self = this;
+	self.control = $("<input id='" + self.options.path + "' type='checkbox' />");
+	self.control.addClass("data");
+	if (self.options.data != undefined) {
+		self.setValue(self.options.data);
+	}
+};
 
-				  self.render = function() {
-					  self.innerControl = $("<input type='checkbox' />");
-				  	  self.innerControl.addClass("data");
-				  	  self.innerControl.attr("id", self.path);
-				  }
+check.prototype.value = function() {
+	var self = this;
+	return self.control.is(":checked")? 1: 0;
+};
 
-				  self.init = function(options) {
-				  }
-
-				  self.control = function() {
-					  return self.innerControl;
-				  }
-
-				  self.appendTo = function(container) {
-					  self.innerControl.appendTo(container);
-				  }
-
-				  self.value = function() {
-					  return innerControl.is(":checked");
-				  }
-				  
-				  self.setValue = function(check) {
-					  return innerControl.attr("checked", "checked");
-				  }
-				  
-				  return this;
-				  /*
-				  return this.each(function() {
-					  var self = this;
-					  var o = options;
-
-					  var container = o.container;
-
-					  return control[0];
-				  });
-				  */
-			  }
-		  });
-
-})(jQuery);
+check.prototype.setValue = function(data) {
+	var self = this;
+	self.control.attr("checked", (data == 1));
+};
 

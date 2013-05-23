@@ -1,43 +1,66 @@
-(function($){
-	     $.fn.extend({ 
-			           
-			  render: function(options) {
-				//	  Set the default values, use comma to separate the settings, example:
-			  var defaults = {
-			  }
+var extendObj = function(childObj, parentObj) {
+	var tmpObj = function () {}
+	tmpObj.prototype = parentObj.prototype;
+	childObj.prototype = new tmpObj();
+	childObj.prototype.constructor = childObj;
+};
 
-			  var options =  $.extend(defaults, options);
-			  return this.each(function() {
-				  var self = this;
-				  var o = options;
+var djon_form = {
+	renders: []
+};
 
-				  var container = o.container;
+var base = new function() {
+	var self = this;
+	self.options = {};
+};
 
-				  var control;
-				  if (self.type == 'text') {
-					  control = $(self).text(o); // $("<input type='text' />");
-				  } else if (self.type == 'boolean') {
-					  control = $(self).check(o);
-				  }
-				  control.render();
-				  var row = $("<div class='row' />");
-				  var controlGroup = $("<div class='control-group' />");
+base.prototype = {
+	baseRender: function(container) {
+		var self = this;
+		self.render();
+		var row = $("<div class='row' />");
+		row.appendTo(container);
 
-				  var label = $("<label for='" + self.path + "' class='control-label'>" + self.caption + "</label>");
-				  var controls = $("<div class='controls' />");
+		var controlGroup = $("<div class='control-group' />");
 
-				  var span = $("<span class='span4' />");
-				  control.appendTo(controls);
-				  controls.appendTo(controlGroup);
-				  label.appendTo(span);
+		if (self.options.label) {
+			var label = $("<label for='" + self.options.path + "' class='control-label'>" + self.options.caption + "</label>");
+			var span = $("<span class='span4' />");
+			span.appendTo(row);
 
-				  span.appendTo(row);
+			label.appendTo(span);
+		}
 
-				  controls.appendTo(row);
+		var controls = $("<div class='controls' />");
+		//controls.appendTo(controlGroup);
+		controls.appendTo(row);
 
-				  row.appendTo(container);
-			  });
-			  }
-		  });
+		if (self.options.value) {
+			self.control.appendTo(controls);
+		}
+	},
 
-})(jQuery);
+	appendTo: function(container) {
+		var self = this;
+		self.control.appendTo(container);
+	}
+};
+
+createControl = function(options) {
+	var result;
+	if (options.type == 'text') {
+		result = new text(options);
+	};
+	if (options.type == 'boolean') {
+		result = new check(options);
+	};
+	if (options.type == 'hidden') {
+		result = new hidden(options);
+	};
+	djon_form.renders[options.path] = result;
+	return result;
+};
+
+getRender = function(id) {
+	return djon_form.renders[id];
+};

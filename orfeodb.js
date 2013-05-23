@@ -1,8 +1,8 @@
 connect('localhost');
 dropNamespace('orfeodb', 'processDefinition');
-dropNamespace('orfeodb', 'processes');
+//dropNamespace('orfeodb', 'processes');
 dropNamespace('orfeodb', 'tasks');
-dropNamespace('orfeodb', 'data');
+//dropNamespace('orfeodb', 'data');
 
 //
 // Metadata
@@ -30,7 +30,13 @@ var task =    {
 		"caption": "Evaluar demanda",
 		"fields": [
 		{
-			"caption": "Nombre",
+			"caption": "Identificacion",
+			"path": "identificacion",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Name",
 			"path": "nombre",
 			"required": 0,
 			"type": "text"
@@ -38,6 +44,12 @@ var task =    {
 		{
 			"caption": "Apellido",
 			"path": "apellido",
+			"required": 0,
+			"type": "text"
+		},
+		{
+			"caption": "Tipo de issue",
+			"path": "tissue",
 			"required": 0,
 			"type": "text"
 		},
