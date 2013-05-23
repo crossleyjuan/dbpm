@@ -63,24 +63,33 @@ collectData=function() {
 		}
 	});
 	return data;
-};
+}
 
-save=function() {
+save=function(done) {
+	var processId = $("#_id").val();
+	var taskId = get("taskName");
+	$.when(sendSave().done(function() {	
+		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
+	}));
+}
+
+sendSave=function() {
 	var controls = $(".data");
-	
 	var data = collectData();
 
 	var processId = data["_id"];
 	var taskId = get("taskName");
 	var urlPost = nodejs + "process/save/" + processId + "/" + taskId; 
+	var defer = new $.Deferred();
 	$.ajax({
 		url: urlPost,
 		dataType: "json",
 		type: "POST",
 		data: data
 	}).done(function(data) {
-		window.location.href = serverUrl + 'load.htm?processId=' + processId + '&taskName=' + taskId;
+		defer.resolve(data);
 	});
+	return defer.promise();
 };
 
 getControlValue=function(controlName) {
@@ -121,6 +130,22 @@ addButton= function(parent, element) {
 	button.appendTo(parent);
 }
 
+popupWindow=function(url, done) {
+	var windowName = "popup";
+	var windowSize = 'height=820,width=704,toolbar=no,scrollbars=yes';
+
+	var $popup = $(window.open(url, windowName, windowSize));
+
+	$popup.load( function () {     //  Execute this function on load
+		$popup.unload(function(){  // Bind the actual event
+			if (done != undefined) {
+				done();
+			}
+		});
+	});
+}
+
+
 loadTask= function() {
 	var taskId = get("taskName");
 
@@ -130,6 +155,10 @@ loadTask= function() {
 		var self = this;
 		self.formDef = data.form;
 		var content = $("#form");
+		// Cleanup everything
+		$.each(content.children(), function(index, val) {
+			val.remove();
+		});
 		var title = $("#title");
 		var span = $("<span>" + self.formDef.caption + "</span>");
 		var fields = self.formDef.fields;
@@ -145,6 +174,17 @@ loadTask= function() {
 			var element = createControl(value);
 			element.baseRender(rows);
 		});
+
+		var uploadButton = $("<input id='uploads' name='uploads' class='data' type='button' value='Subir'>");
+		createField(rows, 'upload',  'upload', uploadButton);
+		uploadButton.bind("click", function() {
+			$.when(sendSave()).done(function() {
+				popupWindow(serverUrl + 'loadfile.htm?processId=' + processId + '&taskName=' + taskId, function() {
+					loadTask();
+				})
+			});
+		});
+
 		span.appendTo(title);
 
 		var actions = $("<div class='form-actions'>").appendTo(form);
@@ -164,6 +204,31 @@ loadTask= function() {
 				}
 			});
 
+			if (processData.files != undefined) {
+				var ulFiles = $("<ul />");
+				createField(rows, 'archivos', 'archivos', ulFiles);
+				$.each(processData.files, function(i, val) {
+					var li = $("<li>");
+					var url = nodejs + "process/file/" + processData["_id"] + "/" + val.name;
+					var anchor = $("<a href='" + url + "'>" + val.name + "</a>");
+					anchor.appendTo(li);
+					li.appendTo(ulFiles);
+				});
+			}
 		});
+	});
+}
+
+loadFileForm=function() {
+	var form=$("#file");
+	var processId=get("processId");
+	var taskName=get("taskName");
+
+	var urlPost = nodejs + "process/upload/" + processId + "/" + taskName; 
+	form.attr("action", urlPost); 
+
+	form.submit(function(e) {
+		window.close();
+		return true;
 	});
 }

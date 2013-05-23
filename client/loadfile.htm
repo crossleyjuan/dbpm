@@ -31,10 +31,14 @@
 		<div class="container">
 			<h2 id="title" class="content-heading"></h2>
 
-			<a href="index.htm">Inicio</a>
 			<div id="form" class="content">
 
-				<a href="index.htm" class='btn btn-info'>Inicio</a>
+				<form id='file' method='POST' enctype='multipart/form-data' >
+					<input type='hidden' id='_id' name='_id' />
+					<input type='hidden' id='h_task' name='h_task' />
+					Archivo: 	<input type='file' id='file' name='file' />
+					<input type='submit' />
+				</form>
 			</div> <!-- /container -->
 
 			<!-- Le javascript
@@ -45,16 +49,12 @@
 			<script src="js/knockout-2.2.1.js"></script>
 			<script src="js/jquery-ui-1.10.1.custom.min.js"></script>
 			<script src="js/defs.js"></script>
-			<script src="js/controls.js"></script>
-			<script src="js/orfeo_jquery.js"></script>
 			<script src="js/orfeo.js"></script>
-			<script src="js/text.js"></script>
-			<script src="js/hidden.js"></script>
-			<script src="js/check.js"></script>
+			<script src="js/orfeo_jquery.js"></script>
 			<script src="js/date.js"></script>
 
 			<script language="javascript">
-				loadTask();
+				loadFileForm();
 			</script>
 		</body>
 	</html>

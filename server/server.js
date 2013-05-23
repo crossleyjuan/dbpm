@@ -4,6 +4,8 @@ var uuid = require('node-uuid');
 var app = express();
 var db = new djondb.WrapConnectionManager();
 var Cache = require('./cache/cache');
+var fs = require('fs');
+var mime = require('mime');
 
 var cache = new Cache();
 
@@ -23,6 +25,9 @@ var allowCrossDomain = function(req, res, next) {
 
 app.configure(function () {
   app.use(allowCrossDomain);
+  if (!fs.existsSync('./uploads')) {
+	  fs.mkdir('./uploads');
+  }
   app.use(express.bodyParser({uploadDir: './uploads'}));
   app.use(express.methodOverride());
   app.use(app.router);
@@ -96,6 +101,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	conn.open();
 
 	var data = req.body;
+	console.log(req.files);
 
 	console.log("body: "+ JSON.stringify(data));
 
@@ -135,7 +141,10 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	console.log("doing update: " + JSON.stringify(processData));
 	conn.update("orfeodb", "processes", processData);
 
-	var resultData = {};
+	var resultData = conn.findByKey("orfeodb", "data", req.params.id);
+	if (resultData == undefined) {
+		resultData = {};
+	}
 	for (var i in data) {
 		if (i == "_id") {
 			resultData["_id"] = data[i];
@@ -206,7 +215,10 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 
 	var data = req.body;
 
-	var resultData = {};
+	var resultData = conn.findByKey("orfeodb", "data", req.params.id);
+	if (resultData == undefined) {
+		resultData = {};
+	}
 	for (var i in data) {
 		if (i == "_id") {
 			resultData["_id"] = data[i];
@@ -232,6 +244,92 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 	res.header("Content-Length", response.length);
 	res.end(response);
 	console.log(response);
+});
+
+createFolder=function(folder) {
+	var spath = folder.split('/');
+	var fullpath = '.';
+	for (var x in spath) {
+		fullpath += '/' + spath[x];
+		if (!fs.existsSync(fullpath)) {
+			fs.mkdirSync(fullpath);
+		}
+	}
+}
+
+app.post("/process/upload/:processId/:taskName", function(req, res, next) {
+	console.log("POST: /process/upload");
+
+	var processId = req.params.processId;
+	var taskName = req.params.taskName;
+
+	console.log(req.files);
+	var tmp_path = req.files.file.path;
+	var target_folder = './public/files/' + processId;
+	var target_path = target_folder + '/' + req.files.file.name;
+	console.log('target: ' + target_path);
+	createFolder(target_folder);
+	fs.rename(tmp_path, target_path, function(err) {
+		if (err) throw err;
+		// delete the temporary file, so that the explicitly set temporary upload dir does not get filled with unwanted files
+		fs.unlink(tmp_path, function() {
+		});
+	});
+
+	var conn = db.getConnection("localhost");
+	conn.open();
+
+	var data = conn.findByKey("orfeodb", "data", processId);
+
+	if (data.files == undefined) {
+		data.files = [];
+	}
+	var file = {};
+	file.name = req.files.file.name;
+	file.fileName = processId + '/' + file.name;
+	data.files.push(file);
+	conn.update('orfeodb', 'data', data);
+
+	console.log('data with file', JSON.stringify(data));
+
+	db.releaseConnection(conn);
+
+	var response = "{ result: 'success' }";
+	res.header("Content-Length", response.length);
+	res.end(response);
+});
+
+app.get("/process/file/:processId/:fileName", function(req, res, next) {
+	console.log("GET: /process/file");
+
+	var processId = req.params.processId;
+	var fileName = req.params.fileName;
+
+	var conn = db.getConnection("localhost");
+	conn.open();
+
+	var data = conn.findByKey("orfeodb", "data", processId);
+
+	console.log(JSON.stringify(data));
+
+	var folder = './public/files/' + processId;
+	for (var i in data.files) {
+		var val = data.files[i];
+		console.log("val: " + JSON.stringify(val));
+		if (val.name == fileName) {
+			var file = './public/files/' + val.fileName;
+			res.download(file);
+			/*
+			var mime = mime.lookup(file);
+			res.setHeader('Content-disposition', 'attachment; filename=' + val.name);
+			res.setHeader('Content-type', mime);
+
+			var fileStream = fs.createReadStream(file);
+		   fileStream.pipe(res);
+			*/
+			return false;
+		}
+	};
 });
 
 app.get("/processes/:user", function(req, res, next) {

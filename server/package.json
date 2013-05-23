@@ -3,7 +3,7 @@
   "name": "OrfeoNodeJS",
   "description": "Orfeo is document workflow system",
   "keywords": ["document", "workflow", "djondb", "express.js", "node.js", "knockout.js"],
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "http://orfeogpl.org/ata/",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
   "dependencies": {
     "express": ">= 3.x",
     "node-uuid": ">= 1.4.0",
+    "mime": ">= 1.2.7",
     "djondb": ">= 0.2.3"
   }
 }
