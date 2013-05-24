@@ -1,3 +1,3 @@
 var server = "localhost";
 var nodejs = "http://" + server + ":50123/";
-var serverUrl = "http://" + server + "/orfeo/";
+var serverUrl = "http://" + server + "/djondb_demo/";

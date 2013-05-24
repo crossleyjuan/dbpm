@@ -1,8 +1,8 @@
 connect('localhost');
-dropNamespace('orfeodb', 'processDefinition');
-//dropNamespace('orfeodb', 'processes');
-dropNamespace('orfeodb', 'tasks');
-//dropNamespace('orfeodb', 'data');
+dropNamespace('djondb', 'processDefinition');
+//dropNamespace('djondb', 'processes');
+dropNamespace('djondb', 'tasks');
+//dropNamespace('djondb', 'data');
 
 //
 // Metadata
@@ -22,7 +22,7 @@ var processDef = {
 	   { "name": "aprobar" }
 	]
 };
-insert('orfeodb', 'processDefinition', processDef);
+insert('djondb', 'processDefinition', processDef);
 
 var task =    {
 	"_id": "evaluar",
@@ -65,7 +65,7 @@ var task =    {
 	"description": "Evaluar demanda",
 	"processName": "Demandas"
 };
-insert('orfeodb', 'tasks', task);
+insert('djondb', 'tasks', task);
 
 var task =    {
 	"_id": "aprobar",
@@ -102,7 +102,7 @@ var task =    {
 	"description": "Aprobar demanda",
 	"processName": "Demandas"
 };
-insert('orfeodb', 'tasks', task);
+insert('djondb', 'tasks', task);
 
 
 //************************************************
@@ -118,7 +118,7 @@ var processDef = {
 	   { "name": "aprobarPeticion" }
 	]
 };
-insert('orfeodb', 'processDefinition', processDef);
+insert('djondb', 'processDefinition', processDef);
 
 var task =    {
 	"_id": "validar",
@@ -149,7 +149,7 @@ var task =    {
 	"description": "Evaluar derecho de peticion",
 	"processName": "DerPeticion"
 };
-insert('orfeodb', 'tasks', task);
+insert('djondb', 'tasks', task);
 
 var task =    {
 	"_id": "aprobarPeticion",
@@ -192,7 +192,7 @@ var task =    {
 		]
 	}
 };
-insert('orfeodb', 'tasks', task);
+insert('djondb', 'tasks', task);
 
 
 //****************************************************
@@ -213,14 +213,14 @@ var process = {
 	"expireDate": "1913-03-25T05:00:00.000Z"
 };
 
-insert('orfeodb', 'processes', process);
+insert('djondb', 'processes', process);
 
 var data =     {
 	"_id": "edf3e1a5-0839-4c84-921c-d1b357b00d0d",
 	"apellido": "Sanchez",
 	"nombre": "Pepe"
 }
-insert('orfeodb', 'data', data);
+insert('djondb', 'data', data);
 
 var processId = uuid();
 var process = {
@@ -237,12 +237,12 @@ var process = {
 	"expireDate": "1913-03-25T05:00:00.000Z"
 };
 
-insert('orfeodb', 'processes', process);
+insert('djondb', 'processes', process);
 var data =     {
 	"_id": processId,
 	"fecha": new Date().toString(),
 	"nombre": "Andres Perez",
 	"descripcionDocumento": "Derecho de peticion de prueba"
 }
-insert('orfeodb', 'data', data);
+insert('djondb', 'data', data);
 */

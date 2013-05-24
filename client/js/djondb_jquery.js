@@ -194,6 +194,10 @@ loadTask= function() {
 		$.ajax({ url: nodejs + "processdata/" + processId,
 			dataType: "json" 
 		}).done(function(processData) {
+			if (processData.length > 0) 
+				processData = processData[0];
+			else
+				processData = {};
 			createControl({type: 'hidden', path:'_id', data: processData["_id"]}).baseRender(rows);
 			createControl({type: 'hidden', path:'_revision', data: processData["_revision"]}).baseRender(rows);
 

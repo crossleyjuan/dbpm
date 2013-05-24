@@ -49,7 +49,8 @@ app.get("/processdata/:id", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var results = conn.findByKey("orfeodb", "data", req.params.id);
+	var results = conn.executeQuery("select * from djondb:data where $'_id' == '" + req.params.id + "'");
+
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(results);
@@ -59,13 +60,16 @@ app.get("/processdata/:id", function(req, res, next) {
 
 
 getTask=function(taskName) {
+	console.log("getTask " + taskName);
 
 	var task = cache.get("task_" + taskName);
 	if (task == undefined) {
 		var conn = db.getConnection("localhost");
 		conn.open();
 
-		task = conn.findByKey("orfeodb", "tasks", taskName);
+		var tasks = conn.executeQuery("select * from djondb:tasks where $'_id' == '" + taskName + "'");
+		if (tasks.length > 0) task = tasks[0];
+
 		cache.put("task_" + taskName, task);
 	}
 
@@ -78,20 +82,23 @@ getTask=function(taskName) {
 };
 
 getProcess=function(processName) {
-	var process = cache.get("process_" + processName);
-	if (process == undefined) {
+	console.log("getProcess(" + processName + ")");
+	var result = cache.get("process_" + processName);
+	if (result == undefined) {
 		var conn = db.getConnection("localhost");
 		conn.open();
 
-		process = conn.findByKey("orfeodb", "processDefinition", processName);
-		cache.put("process_" + processName, process);
+	   var p = conn.executeQuery("select * from djondb:processDefinition where $'_id' == '" + processName + "'");
+		if (p.length > 0) result = p[0];
+
+		cache.put("process_" + processName, result);
 	}
-	if (process != undefined) {
-		console.log("getProcess(" + processName + "): " + process.name);
+	if (result != undefined) {
+		console.log("getProcess(" + processName + "): " + result.name);
 	} else {
 		console.log("getProcess(" + processName + "): null");
 	}
-	return process;
+	return result;
 };
 
 app.post("/process/next/:id/:currentTask", function(req, res, next) {
@@ -126,7 +133,9 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 		}
 	};
 
-	var processData = conn.findByKey('orfeodb', 'processes', data["_id"]);
+	var processDatas = conn.executeQuery("select * from djondb:processes where $'_id' == '" + data["_id"] + "'");
+	var processData = {};
+	if (processDatas.length > 0) processData = processDatas[0];
 
 	if (nextTask != undefined) {
 		processData.currentTask = {
@@ -135,16 +144,15 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 		};
 		processData.status = 'open';
 	} else {
-		processData.currentTask = {};
+		processData.currentTask = { s: 1};
 		processData.status = 'closed';
 	}
 	console.log("doing update: " + JSON.stringify(processData));
-	conn.update("orfeodb", "processes", processData);
+	conn.executeUpdate("update " + JSON.stringify(processData) + " into djondb:processes");
 
-	var resultData = conn.findByKey("orfeodb", "data", req.params.id);
-	if (resultData == undefined) {
-		resultData = {};
-	}
+	var resultData = conn.executeQuery("select * from djondb:data where $'_id' == '" + req.params.id + "'");
+	if (resultData.length > 0) resultData = resultData[0]; else resultData = {};
+
 	for (var i in data) {
 		if (i == "_id") {
 			resultData["_id"] = data[i];
@@ -156,7 +164,7 @@ app.post("/process/next/:id/:currentTask", function(req, res, next) {
 	}
 
 	console.log("doing update: " + JSON.stringify(resultData));
-	conn.update("orfeodb", "data", resultData);
+	conn.executeUpdate("update " + JSON.stringify(resultData) + " into djondb:data");
 
 	db.releaseConnection(conn);
 
@@ -181,22 +189,22 @@ app.get("/process/createCase/:process", function(req, res, next) {
 	var firstTask = getTask(processDef.task[0].name);
 	var process = {
 		_id: processId,
-		process: processName,
-		currentTask: {
-			description: firstTask.description,
-			name: firstTask.name 
-		},
-		currentUser: {
-			fullName: "Juan Pablo Crossley",
-			username: "cross"
-		},
-		status: "open",
-		expireDate: "1913-03-25T05:00:00.000Z"
+	process: processName,
+	currentTask: {
+		description: firstTask.description,
+	name: firstTask.name 
+	},
+	currentUser: {
+		fullName: "Juan Pablo Crossley",
+		username: "cross"
+	},
+	status: "open",
+	expireDate: "1913-03-25T05:00:00.000Z"
 	};
-	conn.insert('orfeodb', 'processes', process);
+	conn.executeUpdate("insert " + JSON.stringify(process) + " into djondb:processes");
 
 	var data = {_id: processId};
-	conn.insert('orfeodb', 'data', data);
+	conn.executeUpdate("insert " + JSON.stringify(data) + " into djondb:data");
 
 	db.releaseConnection(conn);
 
@@ -215,10 +223,9 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 
 	var data = req.body;
 
-	var resultData = conn.findByKey("orfeodb", "data", req.params.id);
-	if (resultData == undefined) {
-		resultData = {};
-	}
+	var resultData = conn.executeQuery("select * from djondb:data where $'_id' == '" + req.params.id + "'");
+	if (resultData.length > 0) resultData = resultData[0]; else resultData = {};
+
 	for (var i in data) {
 		if (i == "_id") {
 			resultData["_id"] = data[i];
@@ -230,7 +237,7 @@ app.post("/process/save/:id/:currentTask", function(req, res, next) {
 	}
 
 	try {
-		conn.update("orfeodb", "data", resultData);
+		conn.executeUpdate("update " + JSON.stringify(resultData) + " into djondb:data");
 
 		console.log("save: " + JSON.stringify(resultData));
 	} catch (e) {
@@ -279,7 +286,8 @@ app.post("/process/upload/:processId/:taskName", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var data = conn.findByKey("orfeodb", "data", processId);
+	var data = conn.executeQuery("select * from djondb:data where $'_id' == '" + processId + "'");
+	if (data.length > 0) data = data[0]; else data = {};
 
 	if (data.files == undefined) {
 		data.files = [];
@@ -288,7 +296,7 @@ app.post("/process/upload/:processId/:taskName", function(req, res, next) {
 	file.name = req.files.file.name;
 	file.fileName = processId + '/' + file.name;
 	data.files.push(file);
-	conn.update('orfeodb', 'data', data);
+	conn.executeUpdate("update " + JSON.stringify(data) + " into djondb:data");
 
 	console.log('data with file', JSON.stringify(data));
 
@@ -308,7 +316,8 @@ app.get("/process/file/:processId/:fileName", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var data = conn.findByKey("orfeodb", "data", processId);
+	var data = conn.executeQuery("select * from djondb:data where $'_id' == '" + processId + "'");
+	if (data.length > 0) data = data[0]; else data = {};
 
 	console.log(JSON.stringify(data));
 
@@ -320,13 +329,13 @@ app.get("/process/file/:processId/:fileName", function(req, res, next) {
 			var file = './public/files/' + val.fileName;
 			res.download(file);
 			/*
-			var mime = mime.lookup(file);
-			res.setHeader('Content-disposition', 'attachment; filename=' + val.name);
-			res.setHeader('Content-type', mime);
+				var mime = mime.lookup(file);
+				res.setHeader('Content-disposition', 'attachment; filename=' + val.name);
+				res.setHeader('Content-type', mime);
 
-			var fileStream = fs.createReadStream(file);
-		   fileStream.pipe(res);
-			*/
+				var fileStream = fs.createReadStream(file);
+				fileStream.pipe(res);
+				*/
 			return false;
 		}
 	};
@@ -338,7 +347,7 @@ app.get("/processes/:user", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var results = conn.find("orfeodb", "processes", "$'currentUser.username' == '" + req.params.user + "' and $'status' != 'closed'");
+	var results = conn.executeQuery("select * from djondb:processes where $'currentUser.username' == '" + req.params.user + "' and $'status' != 'closed'");
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(results);
@@ -353,7 +362,7 @@ app.get("/processDefinition", function(req, res, next) {
 	var conn = db.getConnection("localhost");
 	conn.open();
 
-	var results = conn.find("orfeodb", "processDefinition");
+	var results = conn.executeQuery("select * from djondb:processDefinition");
 	db.releaseConnection(conn);
 
 	var response = JSON.stringify(results);
@@ -363,5 +372,5 @@ app.get("/processDefinition", function(req, res, next) {
 });
 
 app.listen(50123, function() {
-	console.log("Orfeo server listening...");
+	console.log("Djondb test server listening...");
 });
